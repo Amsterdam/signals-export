@@ -1,0 +1,19 @@
+version: '3.0'
+services:
+  database:
+    image: amsterdam/postgres
+    environment:
+      POSTGRES_PASSWORD: insecure
+      POSTGRES_USER: signalsexport
+      POSTGRES_DB: signalsexport
+    volumes:
+        - "~/.ssh/datapunt.key:/root/.ssh/datapunt.key"
+
+  tests:
+    build: ../../
+    links:
+      - database
+    environment:
+      DATABASE_NAME: signalsexport
+      DATABASE_USER: signalsexport
+      DATABASE_PASSWORD: insecure

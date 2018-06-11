@@ -1,0 +1,35 @@
+version: '3.0'
+services:
+  database:
+    image: amsterdam/postgres
+    environment:
+      POSTGRES_PASSWORD: insecure
+      POSTGRES_USER: signalsexport
+      POSTGRES_DB: signalsexport
+    ports:
+      - 5432:5432
+    volumes:
+        - "~/.ssh/datapunt.key:/root/.ssh/datapunt.key"
+
+  web:
+    build: web
+    links:
+      - database
+    environment:
+      DATABASE_NAME: signalsexport
+      DATABASE_USER: signalsexport
+      DATABASE_PASSWORD: insecure
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./web/app:/app/
+      - ./web/deploy:/deploy
+    command: >
+      bash -c "/deploy/docker-wait.sh \
+              && /deploy/docker-migrate.sh \
+              && python manage.py runserver 0.0.0.0:8000"
+
+  swaggerui:
+    image: amsterdam/oauth2swaggerui
+    ports:
+      - 8686:8686
