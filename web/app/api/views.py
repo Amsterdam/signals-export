@@ -32,7 +32,7 @@ class ExternalAPIViewSet(DatapuntViewSet):
 
 
 class SignalViewSet(DatapuntViewSet):
-    serializer_class = ExternalAPISerializer
-    serializer_detail_class = ExternalAPISerializer
+    serializer_class = SignalSerializer
+    serializer_detail_class = SignalSerializer
 
     queryset = Signal.objects.order_by('-signal_id').all()
