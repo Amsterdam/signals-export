@@ -30,7 +30,7 @@ node {
 
     stage("Build image") {
         tryStep "build", {
-            def image = docker.build("build.datapunt.amsterdam.nl:5000/datapunt/signalsexport:${env.BUILD_NUMBER}")
+            def image = docker.build("build.datapunt.amsterdam.nl:5000/datapunt/signalsexport:${env.BUILD_NUMBER}", "web")
             image.push()
         }
     }
@@ -43,7 +43,7 @@ if (BRANCH == "master") {
     node {
         stage('Push acceptance image') {
             tryStep "image tagging", {
-                def image = docker.image("build.datapunt.amsterdam.nl:5000/datapunt/signalsexport:${env.BUILD_NUMBER}")
+                def image = docker.image("build.datapunt.amsterdam.nl:5000/datapunt/signalsexport:${env.BUILD_NUMBER}", "web")
                 image.pull()
                 image.push("acceptance")
             }
