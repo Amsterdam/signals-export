@@ -1,0 +1,22 @@
+version: '3.0'
+services:
+  database:
+    image: amsterdam/postgres
+    volumes:
+      - ./backups:/tmp/backups
+    environment:
+      POSTGRES_PASSWORD: insecure
+      POSTGRES_USER: signalsexport
+      POSTGRES_DB: signalsexport
+
+  importer:
+    image: build.datapunt.amsterdam.nl:5000/datapunt/signalsexport:${ENVIRONMENT}
+    links:
+      - database
+    environment:
+      SECRET_KEY: insecure
+      DATABASE_NAME: onderwijs
+      DATABASE_USER: onderwijs
+      DATABASE_PASSWORD: insecure
+    command: "echo placeholder for import"
+
