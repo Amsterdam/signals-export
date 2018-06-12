@@ -3,9 +3,9 @@ from api import views
 
 router = views.SignalsExportAPIRouter()
 router.register(
-    'signals', views.SignalViewSet, base_name='signals')
+    'signal', views.SignalViewSet, base_name='signal')
 router.register(
-    'external_apis', views.ExternalAPIViewSet, base_name='external_apis')
+    'external_api', views.ExternalAPIViewSet, base_name='external_api')
 
 urlpatterns = [
     url(r'^', include(router.urls)),
