@@ -7,8 +7,7 @@ from rest_framework.test import APITestCase
 class BrowseDatasetsTestCase(APITestCase):
 
     datasets = [
-        "signals-export/signals",
-        "signals-export/external_apis",
+        "signals-export/messagelog",
     ]
 
 #    def setUp(self):

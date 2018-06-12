@@ -5,11 +5,6 @@ from datasets import models
 from datapunt_api.rest import HALSerializer
 
 
-class ExternalAPISerializer(serializers.ModelSerializer):
+class MessageLogSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.ExternalAPI
-
-
-class SignalSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Signal
+        model = models.MessageLog

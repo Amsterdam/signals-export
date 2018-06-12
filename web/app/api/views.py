@@ -4,10 +4,8 @@ from rest_framework import viewsets
 from rest_framework import routers
 from datapunt_api.rest import DatapuntViewSet, HALPagination
 
-from api.serializers import ExternalAPISerializer
-from api.serializers import SignalSerializer
-from datasets.models import ExternalAPI
-from datasets.models import Signal
+from api.serializers import MessageLogSerializer
+from datasets.models import MessageLog
 
 
 # --- general ---
@@ -24,15 +22,8 @@ class SignalsExportAPIRouter(routers.DefaultRouter):
 
 # --- specific ---
 
-class ExternalAPIViewSet(DatapuntViewSet):
-    serializer_class = ExternalAPISerializer
-    serializer_detail_class = ExternalAPISerializer
+class MessageLogViewSet(DatapuntViewSet):
+    serializer_class = MessageLogSerializer
+    serializer_detail_class = MessageLogSerializer
 
-    queryset = ExternalAPI.objects.order_by('name').all()
-
-
-class SignalViewSet(DatapuntViewSet):
-    serializer_class = SignalSerializer
-    serializer_detail_class = SignalSerializer
-
-    queryset = Signal.objects.order_by('-signal_id').all()
+    queryset = MessageLog.objects.order_by('-signal_id').all()

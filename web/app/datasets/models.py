@@ -1,13 +1,10 @@
 from django.db import models
 
 
-class ExternalAPI(models.Model):
-    name = models.CharField(max_length=255)
-
-
-class Signal(models.Model):
-    signal_id = models.IntegerField()
-    datetime_retrieved = models.DateTimeField()
-    datetime_sent = models.DateTimeField()
-    external_api = models.ForeignKey(ExternalAPI, on_delete=models.CASCADE)
-    status = models.CharField(max_length=255)
+class MessageLog(models.Model):
+    signal_id = models.IntegerField(unique=True)
+    t_entered = models.DateTimeField()
+    t_sent = models.DateTimeField(blank=True)
+    external_api = models.CharField(max_length=255, blank=True)
+    status = models.CharField(max_length=255, blank=True)
+    is_sent = models.BooleanField(default=False)
