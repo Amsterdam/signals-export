@@ -55,7 +55,7 @@ class BaseExternalAPIHandler():
         raise NotImplentedError('Subclass {} to provide an implementation.'.format(self.__class__))
 
 
-def _route(signal):
+def _get_handler(signal):
     pass
 
 
@@ -64,8 +64,7 @@ def _batch_signals(signals):
 
     with _get_session_with_retries() as session:
         result = session.get(next_page)
-        data = result.json()['results']
-        yield data
+        yield result.json()['results']
 
         next_page = results.json()['_links']['next']['href']
         if next_page == None:
@@ -89,7 +88,7 @@ def _call_external_apis(signals):
             if s.is_sent:
                 continue
 
-        handler = _route_signals(s)
+        handler = _get_handler(s)
         success, status = handler.handle(s)
 
         entry.success = success
