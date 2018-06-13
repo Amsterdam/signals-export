@@ -24,7 +24,8 @@ INSTALLED_APPS = [
     'corsheaders',
 
     'datasets',
-    'api'
+    'api',
+    'health'
 ]
 
 
@@ -45,6 +46,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 ROOT_URLCONF = 'signalsexport.urls'
 
 WSGI_APPLICATION = 'signalsexport.wsgi.application'
+
+HEALTH_MODEL = 'datasets.MessageLog'
 
 DATABASE_OPTIONS = {
     LocationKey.docker: {
