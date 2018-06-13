@@ -19,6 +19,6 @@ dc build
 
 echo "Placeholder for signals-export test suite."
 
-# dc run tests /deploy/docker-wait.sh
-# dc run tests /deploy/docker-migrate.sh
-# dc run tests python manage.py test --noinput --nomigrations
+dc run tests /deploy/docker-wait.sh
+dc run tests /deploy/docker-migrate.sh
+dc run tests python manage.py test --noinput
