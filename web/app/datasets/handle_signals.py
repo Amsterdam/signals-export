@@ -13,19 +13,35 @@ Possible upgrades:
 - allow signal API to post a message to process
 - add a proper task queue (like Celery)
 """
+# Assumptions:
+# 1) Each signal will be sent to 1 API at most (underlies both table design and
+#    routing implementation.
+
+
 import os
+import datetime
+import logging
 
 import requests
+from django.conf import settings
+from django.utils import timezone
 
-from datasets import models
+from datasets.models import MessageLog
+from datasets.external.base import get_handler
 
+# -- setup logging --
+LOG_FORMAT = '%(asctime)-15s - %(name)s - %(message)s'
+logging.basicConfig(format=LOG_FORMAT, level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
-API_BASE = 'https://acc.api.data.amsterdam.nl/signals'
+# -- Datapunt internal Signalen in Amsterdam API endpoints --
+#    note: should be set by Ansible or docker-compose.yml
+SIGNALS_API_BASE = os.getenv('SIGNALS_API_BASE', 'https://acc.api.data.amsterdam.nl')
 
 
 def _get_session_with_retries():
     """
-    Get a requests Session that will retry some set number of times.
+    Get a requests Session that will retry 5 times on a number of HTTP 500 statusses.
     """
     session = requests.Session()
 
@@ -42,25 +58,11 @@ def _get_session_with_retries():
     return session
 
 
-class BaseExternalAPIHandler():
-    external_api = None
-
-    def handle(self, signal):
-        """
-        Given a signal call out to an external API.
-        """
-        # Expected return value a tuple of (success, status)
-        # Make sure that any Exceptions caused by the interactions with external
-        # APIs are silenced.
-        raise NotImplentedError('Subclass {} to provide an implementation.'.format(self.__class__))
-
-
-def _get_handler(signal):
-    pass
-
-
 def _batch_signals(signals):
-    next_page = API_BASE + '/signal/'
+    """
+    Access the Signalen in Amsterdam API, retrieve signals.
+    """
+    next_page = SIGNALS_API_BASE + '/signal/'
 
     with _get_session_with_retries() as session:
         result = session.get(next_page)
@@ -74,31 +76,42 @@ def _batch_signals(signals):
 def _call_external_apis(signals):
     """
     Call external APIs for each of the signals.
+
+    Note signals are expected as dictionaries, not objects.
     """
     for s in signals:
+        # Check local database to see whether this signal was alreay sent to
+        # the relevant external API (if so skip, else update local database).
         try:
-            entry = MessageLog.objects.get(s.signal_id)
+            entry = MessageLog.objects.get(signal_id=s['signal_id'])
         except MessageLog.DoesNotExist:
+            logger.debug('Creating entry for {}.'.format(s['signal_id']))
             entry = MessageLog(
-                signal_id=s.signal_id,
-                t_entered=datetime.datetime.now()
+                signal_id=s['signal_id'],
+                t_entered=timezone.now()
             )
             entry.save()
         else:
-            if s.is_sent:
+            logger.debug('Retrieved entry for {}.'.format(s['signal_id']))
+            if entry.is_sent:
                 continue
 
-        handler = _get_handler(s)
+        # Send the signal to the correct API.
+        handler = get_handler(s)
         success, status = handler.handle(s)
 
-        entry.success = success
+        # Save the status to our local database.
+        entry.is_sent = success
         entry.status = status
-        entry.t_sent = datetime.datetime.now()
-        entry.external_api = handler.external_api
+        entry.t_sent = timezone.now()
+        entry.handler_name = handler.name
 
         entry.save()
 
 
 def handle_signals():
+    """
+    Entry point (called via manage.py), retrieve and handle signals.
+    """
     for signals in _batch_signals():
         _call_external_apis(signals)
