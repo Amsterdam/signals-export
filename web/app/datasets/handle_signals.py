@@ -79,26 +79,26 @@ def _call_external_apis(signals):
 
     Note signals are expected as dictionaries, not objects.
     """
-    for s in signals:
+    for signal in signals:
         # Check local database to see whether this signal was alreay sent to
         # the relevant external API (if so skip, else update local database).
         try:
-            entry = MessageLog.objects.get(signal_id=s['signal_id'])
+            entry = MessageLog.objects.get(signal_id=signal['signal_id'])
         except MessageLog.DoesNotExist:
-            logger.debug('Creating entry for {}.'.format(s['signal_id']))
+            logger.debug('Creating entry for {}.'.format(signal['signal_id']))
             entry = MessageLog(
-                signal_id=s['signal_id'],
+                signal_id=signal['signal_id'],
                 t_entered=timezone.now()
             )
             entry.save()
         else:
-            logger.debug('Retrieved entry for {}.'.format(s['signal_id']))
+            logger.debug('Retrieved entry for {}.'.format(signal['signal_id']))
             if entry.is_sent:
                 continue
 
         # Send the signal to the correct API.
-        handler = get_handler(s)
-        success, status = handler.handle(s)
+        handler = get_handler(signal)
+        success, status = handler.handle(signal)
 
         # Save the status to our local database.
         entry.is_sent = success

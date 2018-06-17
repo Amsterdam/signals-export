@@ -77,6 +77,9 @@ def get_handler(signal):
     """
     Choose the correct API handler for a signal.
     """
+    # We use an OrderedDict to keep our handler instances (to keep order). We
+    # reverse the iteration order over the values because the handler that was
+    # added last has precedence of those that were added earlier.
     for handler in reversed(_HANDLERS.values()):
         if handler.can_handle(signal):
             return handler
