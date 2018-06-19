@@ -11,7 +11,8 @@ django-cors-headers
 datapunt-authorization-django
 datapunt-authorization-levels
 
-psycopg2
+# psycopg2
+psycopg2-binary
 requests
 
 pytest
