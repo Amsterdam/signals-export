@@ -50,7 +50,7 @@ if (BRANCH == "master") {
         }
     }
 
-/*    node {
+    node {
         stage("Deploy to ACC") {
             tryStep "deployment", {
                 build job: 'Subtask_Openstack_Playbook',
@@ -91,5 +91,4 @@ if (BRANCH == "master") {
             }
         }
     }
-*/
 }
