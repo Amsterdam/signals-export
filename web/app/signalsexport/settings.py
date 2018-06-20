@@ -107,6 +107,6 @@ DATAPUNT_AUTHZ = {
     'MIN_SCOPE': 'GAS/R',
     'FORCED_ANONYMOUS_ROUTES': (
         '/status/',
-        '/signalsexport/static/',
+        '/signals_export/static/',
     )
 }
