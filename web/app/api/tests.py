@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase
 class BrowseDatasetsTestCase(APITestCase):
 
     datasets = [
-        "signals-export/messagelog",
+        "signals_export/messagelog",
     ]
 
 #    def setUp(self):
@@ -35,7 +35,7 @@ class BrowseDatasetsTestCase(APITestCase):
         )
 
     def test_index_pages(self):
-        url = "signals-export"
+        url = "signals_export"
 
         response = self.client.get("/{}/".format(url))
 
