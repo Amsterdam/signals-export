@@ -39,7 +39,7 @@ urlpatterns = [
     ),
 
     # health checks for deploy / orchestration
-    path('health/', include(health_urls)),
+    path('status/', include(health_urls)),
 
     # The signals-export API endpoints
     path('signals-export/', include(api_urls)),
