@@ -42,5 +42,5 @@ urlpatterns = [
     path('status/', include(health_urls)),
 
     # The signals-export API endpoints
-    path('signals-export/', include(api_urls)),
+    path('signals_export/', include(api_urls)),
 ]
