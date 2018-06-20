@@ -1,5 +1,5 @@
-from django.conf.urls import include, url
-from django.urls import path
+from django.conf.urls import include
+from django.urls import path, re_path
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -22,17 +22,17 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     # Swagger / OpenAPI
-    url(
+    re_path(
         r'^signals-export/swagger(?P<format>\.json|\.yaml)$',
         schema_view.without_ui(cache_timeout=None),
         name='schema-json'
     ),
-    url(
+    re_path(
         r'^signals-export/swagger/$',
         schema_view.with_ui('swagger', cache_timeout=None),
         name='schema-swagger-ui'
     ),
-    url(
+    re_path(
         r'^signals-export/redoc/$',
         schema_view.with_ui('redoc', cache_timeout=None),
         name='schema-redoc'
