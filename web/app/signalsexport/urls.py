@@ -23,17 +23,17 @@ schema_view = get_schema_view(
 urlpatterns = [
     # Swagger / OpenAPI
     re_path(
-        r'^signals-export/swagger(?P<format>\.json|\.yaml)$',
+        r'^signals_export/swagger(?P<format>\.json|\.yaml)$',
         schema_view.without_ui(cache_timeout=None),
         name='schema-json'
     ),
     re_path(
-        r'^signals-export/swagger/$',
+        r'^signals_export/swagger/$',
         schema_view.with_ui('swagger', cache_timeout=None),
         name='schema-swagger-ui'
     ),
     re_path(
-        r'^signals-export/redoc/$',
+        r'^signals_export/redoc/$',
         schema_view.with_ui('redoc', cache_timeout=None),
         name='schema-redoc'
     ),
