@@ -15,6 +15,4 @@ class Command(BaseCommand):
     help = 'Retrieve signals from signal API and send messages if needed.'
 
     def handle(self, *args, **options):
-        self.stdout.write('Not yet implemented')
         handle_signals()
-
