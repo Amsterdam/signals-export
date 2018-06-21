@@ -16,6 +16,9 @@ Signalen in Amsterdam project. Related code:
 This project comes with a docker-compose file that will build a self contained development
 environment (with bind mounts for the web application source).
 
+Set the `SIGMAX_SERVER` and `SIGMAX_AUTH_TOKEN` environment variables to appropriate
+values (these are secret, so not included with the source).
+
 ```sh
 docker-compose up --build
 ```
