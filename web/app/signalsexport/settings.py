@@ -33,7 +33,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
-#    'authorization_django.authorization_middleware',
+    'authorization_django.authorization_middleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
 
@@ -104,9 +104,28 @@ JWKS_TEST_KEY = """
 
 DATAPUNT_AUTHZ = {
     'JWKS': os.getenv('PUB_JWKS', JWKS_TEST_KEY),
-    'MIN_SCOPE': 'GAS/R',
+    'ALWAYS_OK': LOCAL,
     'FORCED_ANONYMOUS_ROUTES': (
         '/status/',
         '/signals_export/static/',
     )
+}
+
+SWAGGER_SETTINGS = {
+   'USE_SESSION_AUTH': False,
+   'SECURITY_DEFINITIONS': {
+      'Signals Export API - Swagger': {
+         'type': 'oauth2',
+         'authorizationUrl': DATAPUNT_API_URL + "oauth2/authorize",
+         'flow': 'implicit',
+         'scopes': {
+            'SIG/ALL': 'Signals alle authorizaties',
+         }
+      }
+   },
+   'OAUTH2_CONFIG': {
+      'clientId': 'swagger-ui',
+      #  'clientSecret': 'yourAppClientSecret',
+      'appName': 'Signal Swagger UI',
+   },
 }
