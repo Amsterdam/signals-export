@@ -10,6 +10,7 @@ insecure_key = 'insecure'
 SECRET_KEY = os.getenv('SECRET_KEY', insecure_key)
 
 DEBUG = SECRET_KEY == insecure_key
+LOCAL = SECRET_KEY == insecure_key
 
 ALLOWED_HOSTS = ['*']
 
