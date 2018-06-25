@@ -21,12 +21,15 @@ Possible upgrades:
 import os
 import datetime
 import logging
+from urllib3.util import Retry
 
 import requests
+from requests.adapters import HTTPAdapter
 from django.conf import settings
 from django.utils import timezone
 
 from datasets.models import MessageLog
+from datasets.internal.get_signals import GetAccessToken
 from datasets.external.base import get_handler
 
 # -- setup logging --
@@ -58,17 +61,20 @@ def _get_session_with_retries():
     return session
 
 
-def _batch_signals(signals):
+def _batch_signals(access_token):
     """
     Access the Signalen in Amsterdam API, retrieve signals.
     """
-    next_page = SIGNALS_API_BASE + '/signal/'
+    next_page = SIGNALS_API_BASE + '/signals/auth/signal/'
 
     with _get_session_with_retries() as session:
-        result = session.get(next_page)
+        result = session.get(
+            next_page,
+            headers=access_token
+        )
         yield result.json()['results']
 
-        next_page = results.json()['_links']['next']['href']
+        next_page = result.json()['_links']['next']['href']
         if next_page == None:
             raise StopIteration
 
@@ -113,5 +119,12 @@ def handle_signals():
     """
     Entry point (called via manage.py), retrieve and handle signals.
     """
-    for signals in _batch_signals():
+    # FIXME: for now only acceptance is supported (and hardcoded below)
+    acceptance = True
+    email = os.getenv('SIGNALS_USER', 'signals.admin@amsterdam.nl')
+    password = os.getenv('SIGNALS_PASSWORD', 'insecure')
+
+    access_token = GetAccessToken().getAccessToken(email, password, acceptance)
+    for signals in _batch_signals(access_token):
+        logger.debug(signals)
         _call_external_apis(signals)
