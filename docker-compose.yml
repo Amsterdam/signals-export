@@ -19,6 +19,10 @@ services:
       DATABASE_NAME: signalsexport
       DATABASE_USER: signalsexport
       DATABASE_PASSWORD: insecure
+
+      # The following are secrets to external APIs:
+      SIGMAX_AUTH_TOKEN:
+      SIGMAX_SERVER:
     ports:
       - "8000:8000"
     volumes:

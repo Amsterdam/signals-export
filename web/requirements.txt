@@ -28,3 +28,4 @@ drf-yasg
 drf-yasg[validation]
 swagger-spec-validator
 flex
+lxml
