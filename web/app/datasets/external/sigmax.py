@@ -142,7 +142,7 @@ def _send_stuf_message(stuf_msg):
         verify=False
     )
 
-    # We return the response object sot that we can check the response from
+    # We return the response object so that we can check the response from
     # the external API handler.
     return response
 
