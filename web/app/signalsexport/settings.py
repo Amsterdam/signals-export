@@ -130,3 +130,5 @@ SWAGGER_SETTINGS = {
       'appName': 'Signal Swagger UI',
    },
 }
+
+TEST_RUNNER = 'signalsexport.runner.PytestTestRunner'
