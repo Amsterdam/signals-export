@@ -5,7 +5,7 @@ import random
 import string
 from urllib.parse import urlparse, parse_qsl
 
-class GetAccessToken(object):
+class GetAccessToken():
     """
         Get an header authentication item for access token
         for using the internal API's

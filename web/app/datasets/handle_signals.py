@@ -68,15 +68,15 @@ def _batch_signals(access_token):
     next_page = SIGNALS_API_BASE + '/signals/auth/signal/'
 
     with _get_session_with_retries() as session:
-        result = session.get(
-            next_page,
-            headers=access_token
-        )
-        yield result.json()['results']
-
-        next_page = result.json()['_links']['next']['href']
-        if next_page == None:
-            raise StopIteration
+        while True:
+            result = session.get(
+                next_page,
+                headers=access_token
+            )
+            next_page = result.json()['_links']['next']['href']
+            yield result.json()['results']
+            if next_page == None:
+                raise StopIteration
 
 
 def _call_external_apis(signals):
