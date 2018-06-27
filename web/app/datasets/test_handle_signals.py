@@ -139,7 +139,7 @@ class TestHandleSignals(TestCase):
         reset_handlers()
 
     @patch('datasets.handle_signals._batch_signals')
-    @patch('datasets.internal.get_signals.GetAccessToken.getAccessToken')
+    @patch('datasets.internal.get_auth_token.GetAccessToken.getAccessToken')
     def test_handle_signals(self, patched_get_access_token, patched_batch):
         patched_get_access_token.return_value = {'Authorization', 'DOES NOT MATTER'}
         patched_batch.return_value = [[{'signal_id': 1}, {'signal_id': 2}], [{'signal_id': 3}]]

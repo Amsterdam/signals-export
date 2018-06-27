@@ -29,7 +29,7 @@ from django.conf import settings
 from django.utils import timezone
 
 from datasets.models import MessageLog
-from datasets.internal.get_signals import GetAccessToken
+from datasets.internal.get_auth_token import GetAccessToken
 from datasets.external.base import get_handler
 
 # -- setup logging --
