@@ -1,0 +1,81 @@
+{
+  "_links": {
+    "self": {
+      "href": "https://acc.api.data.amsterdam.nl/signals/auth/signal/?location__address_text=Dam"
+    },
+    "next": {
+      "href": null
+    },
+    "previous": {
+      "href": null
+    }
+  },
+  "count": 1,
+  "results": [
+    {
+      "_links": {
+        "self": {
+          "href": "https://acc.api.data.amsterdam.nl/signals/auth/signal/5/"
+        }
+      },
+      "_display": "5 - m - ABC - 2018-06-27 09:13:15.277401+00:00",
+      "id": 5,
+      "signal_id": "9b129116-4da0-4fbe-b0cd-de67ab3d4a63",
+      "source": "string",
+      "text": "string",
+      "text_extra": "string",
+      "status": {
+        "id": 2,
+        "text": "string",
+        "user": "user@example.com",
+        "target_api": "string",
+        "state": "m",
+        "extern": true,
+        "extra_properties": "string"
+      },
+      "location": {
+        "id": 2,
+        "stadsdeel": "A",
+        "buurt_code": "ABC",
+        "address": {
+          "postcode": "1012JS",
+          "huisletter": "A",
+          "huisnummer": "1",
+          "woonplaats": "Amsterdam",
+          "openbare_ruimte": "Dam",
+          "huisnummer_toevoeging": "1"
+        },
+        "address_text": "Dam 1A-1 1012JS Amsterdam",
+        "geometrie": {
+          "type": "Point",
+          "coordinates": [
+            135,
+            45
+          ]
+        },
+        "extra_properties": {}
+      },
+      "category": {
+        "main": "string",
+        "sub": "string",
+        "department": "string",
+        "priority": 0
+      },
+      "reporter": {
+        "email": "user@example.com",
+        "phone": "string",
+        "remove_at": "2018-06-27T06:47:12.423000Z",
+        "created_at": "2018-06-27T09:13:15.268862Z",
+        "updated_at": "2018-06-27T09:13:15.268893Z",
+        "extra_properties": "string"
+      },
+      "created_at": "2018-06-27T09:13:15.277401Z",
+      "updated_at": "2018-06-27T06:47:12.423000Z",
+      "incident_date_start": "2018-06-27T09:13:15.277349Z",
+      "incident_date_end": "2018-06-27T06:47:12.423000Z",
+      "operational_date": "2018-06-27T06:47:12.423000Z",
+      "image": null,
+      "upload": null
+    }
+  ]
+}
