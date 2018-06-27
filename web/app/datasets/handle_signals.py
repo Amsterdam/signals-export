@@ -61,6 +61,7 @@ def _get_session_with_retries():
     return session
 
 
+# TODO: move to datasets/internal/signal.py
 def _batch_signals(access_token):
     """
     Access the Signalen in Amsterdam API, retrieve signals.

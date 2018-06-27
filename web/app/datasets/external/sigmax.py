@@ -50,8 +50,8 @@ u"""<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:
                 <ZKN:zaakniveau>1</ZKN:zaakniveau>
                 <ZKN:deelzakenIndicatie>N</ZKN:deelzakenIndicatie>
                 <StUF:extraElementen>
-                   <StUF:extraElement naam="Ycoordinaat">{EINDDATUMGEPLAND}</StUF:extraElement>
-                   <StUF:extraElement naam="Xcoordinaat">{EINDDATUMGEPLAND}</StUF:extraElement>
+                   <StUF:extraElement naam="Ycoordinaat">{X}</StUF:extraElement>
+                   <StUF:extraElement naam="Xcoordinaat">{Y}</StUF:extraElement>
                 </StUF:extraElementen>
                 <ZKN:isVan StUF:entiteittype="ZAKZKT" StUF:verwerkingssoort="T">
                    <ZKN:gerelateerde StUF:entiteittype="ZKT" StUF:sleutelOntvangend="1" StUF:verwerkingssoort="T">
@@ -97,6 +97,11 @@ def _generate_stuf_message(signal):
     """
     Generate the XML needed for Sigmax.
     """
+    logger.debug('Openbare ruimte naam in signal: "{}"'.format(
+        signal['location']['address']['openbare_ruimte']))
+    # TODO: "huisnummer toevoeging" seems missing - can be a real problem - check this
+    # TODO: check X and Y (are they WGS84, are they lon lat or lat lon?)
+    # TODO: figure out which is which with regards to the dates and times
     return TEMPLATE.format(**{
         'PRIMARY_KEY': escape(signal['signal_id']),
         'OMSCHRIJVING': escape('Dit is een test bericht'),
@@ -104,9 +109,11 @@ def _generate_stuf_message(signal):
         'STARTDATUM': escape(PLACEHOLDER_STRING),
         'REGISTRATIEDATUM': escape(PLACEHOLDER_STRING),
         'EINDDATUMGEPLAND': escape(PLACEHOLDER_STRING),
-        'OPENBARERUIMTENAAM': escape(PLACEHOLDER_STRING),
-        'HUISNUMMER': escape(PLACEHOLDER_STRING),
-        'POSTCODE': escape(PLACEHOLDER_STRING),
+        'OPENBARERUIMTENAAM': escape(signal['location']['address']['openbare_ruimte']),
+        'HUISNUMMER': escape(signal['location']['address']['huisnummer']),
+        'POSTCODE': escape(signal['location']['address']['postcode']),
+        'X': escape(str(signal['location']['geometrie']['coordinates'][0])),
+        'Y': escape(str(signal['location']['geometrie']['coordinates'][1])),
     })
 
 
@@ -148,10 +155,11 @@ def _send_stuf_message(stuf_msg):
 
 
 # -- Sigmax API Handler --
+# Note: the SigmaxHandler below does not yet implement the can_handle method
+# because at present no clear specs are available for the message routing.
+# TODO: implement can_handle method on SigmaxHandler
 
 class SigmaxHandler(BaseAPIHandler):
     def handle(self, signal):
-        pass
-
-    def can_handle(self, signal):
-        pass # TODO: integrate with "signals" API
+        msg = _generate_stuf_message(signal)
+        _send_stuf_message(msg)

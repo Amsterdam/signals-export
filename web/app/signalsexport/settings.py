@@ -132,3 +132,4 @@ SWAGGER_SETTINGS = {
 }
 
 TEST_RUNNER = 'signalsexport.runner.PytestTestRunner'
+FIXTURES_DIR = os.path.join(BASE_DIR, 'fixtures')

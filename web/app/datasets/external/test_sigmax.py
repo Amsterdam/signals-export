@@ -1,13 +1,17 @@
 """
 Test suite for Sigmax message generation.
 """
+import os
+import json
 import logging
 import time
+import copy
 import datetime
 from unittest import mock
 from lxml import etree
 
 from django.test import TestCase
+from django.conf import settings
 
 from datasets.external import sigmax
 
@@ -53,8 +57,21 @@ class TestSigmaxHelpers(TestCase):
 
 
 class TestGenerateStufMessage(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        fixture_file = os.path.join(
+            settings.FIXTURES_DIR, 'datasets', 'internal', 'auth_signal.json')
+
+        with open(fixture_file, 'r') as f:
+            test_data = json.load(f)
+        cls._example_signal = test_data['results'][0]
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
     def test_is_xml(self):
-        signal = {'signal_id': 'ABACADABRA'}
+        signal = copy.deepcopy(self._example_signal)
         xml = sigmax._generate_stuf_message(signal)
 
         try:
@@ -63,9 +80,60 @@ class TestGenerateStufMessage(TestCase):
             self.fail('Cannot parse STUF message as XML')
 
     def test_escaping(self):
-        poison = {'signal_id': '<poison>tastes nice</poison>'}
+        poison = copy.deepcopy(self._example_signal)
+        poison.update({'signal_id': '<poison>tastes nice</poison>'})
         msg = sigmax._generate_stuf_message(poison)
         self.assertTrue('<poison>' not in msg)
+
+    def test_propagate_signal_properties_to_message(self):
+        signal = copy.deepcopy(self._example_signal)
+
+        msg = sigmax._generate_stuf_message(signal)
+
+        # first test that we have obtained valid XML
+        try:
+            root = etree.fromstring(msg)
+        except:
+            self.fail('Cannot parse STUF message as XML')
+
+        # Check whether our properties made it over (crudely, maybe use XPATH here)
+        NEED_TO_FIND = dict([
+            (
+                '{http://www.egem.nl/StUF/StUF0301}referentienummer',
+                signal['signal_id']
+            ),
+            (
+                '{http://www.egem.nl/StUF/sector/zkn/0310}identificatie',
+                signal['signal_id']
+            ),
+            (
+                '{http://www.egem.nl/StUF/sector/bg/0310}gor.openbareRuimteNaam',
+                signal['location']['address']['openbare_ruimte']
+            ),
+            (
+                '{http://www.egem.nl/StUF/sector/bg/0310}huisnummer',
+                signal['location']['address']['huisnummer']
+            ),
+            (
+                '{http://www.egem.nl/StUF/sector/bg/0310}postcode',
+                signal['location']['address']['postcode']
+            ),
+        ])
+        # X and Y need to be checked differently
+
+        logger.debug(msg)
+
+        for element in root.iter():
+            logger.debug('Found: {}'.format(element.tag))
+            if element.tag in NEED_TO_FIND:
+                correct = NEED_TO_FIND[element.tag] == element.text
+                logger.debug('Found {} and is correct {}'.format(
+                    element.tag, correct))
+                logger.debug('element.text {}'.format(element.text))
+                if correct:
+                    del NEED_TO_FIND[element.tag]
+
+        self.assertEquals(len(NEED_TO_FIND), 0)
 
 
 def show_args_kwargs(*args, **kwargs):
