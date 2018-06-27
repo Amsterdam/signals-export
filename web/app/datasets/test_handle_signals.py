@@ -8,10 +8,19 @@ from django.test import TestCase
 from django.utils import timezone
 from django.test.utils import override_settings
 import pytz
+import requests
 
 from datasets import handle_signals
 from datasets.models import MessageLog
 from datasets.external.base import reset_handlers
+
+
+# -- test _get_session_with_retries --
+
+class TestGetSessionWithRetries(TestCase):
+    def test_returns_session_instance(self):
+        test_session = handle_signals._get_session_with_retries()
+        self.assertIsInstance(test_session, requests.Session)
 
 
 # -- _call_external_apis --
