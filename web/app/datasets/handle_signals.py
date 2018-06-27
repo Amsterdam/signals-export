@@ -67,12 +67,16 @@ def _batch_signals(access_token):
     """
     next_page = SIGNALS_API_BASE + '/signals/auth/signal/'
 
+    if not access_token:
+        raise Exception('No access token available, cannot access data.')
     with _get_session_with_retries() as session:
         while True:
             result = session.get(
                 next_page,
                 headers=access_token
             )
+            if result.status_code == 403:
+                raise Exception('Wrong or expired access token, cannot access data.')
             next_page = result.json()['_links']['next']['href']
             yield result.json()['results']
             if next_page == None:
