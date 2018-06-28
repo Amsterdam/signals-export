@@ -109,6 +109,8 @@ DATAPUNT_AUTHZ = {
     'FORCED_ANONYMOUS_ROUTES': (
         '/status/',
         '/signals_export/static/',
+        '/signals_export/redoc/',
+        '/signals_export/swagger/',
     )
 }
 
