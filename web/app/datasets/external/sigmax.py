@@ -7,6 +7,7 @@ import os
 import logging
 import datetime
 import requests
+from dateutil.parser import parse
 from xml.sax.saxutils import escape
 
 from datasets.external.base import BaseAPIHandler
@@ -102,13 +103,19 @@ def _generate_stuf_message(signal):
     # TODO: "huisnummer toevoeging" seems missing - can be a real problem - check this
     # TODO: check X and Y (are they WGS84, are they lon lat or lat lon?)
     # TODO: figure out which is which with regards to the dates and times
+
+    # convert the ISO8601 datetime strings (from JSON data) to datetime objects
+    created_at = parse(signal['created_at'])
+    incident_date_start = parse(signal['incident_date_start'])
+    incident_date_end = parse(signal['incident_date_end'])
+
     return TEMPLATE.format(**{
         'PRIMARY_KEY': escape(signal['signal_id']),
         'OMSCHRIJVING': escape('Dit is een test bericht'),
-        'TIJDSTIPBERICHT': escape(PLACEHOLDER_STRING),
-        'STARTDATUM': escape(PLACEHOLDER_STRING),
-        'REGISTRATIEDATUM': escape(PLACEHOLDER_STRING),
-        'EINDDATUMGEPLAND': escape(PLACEHOLDER_STRING),
+        'TIJDSTIPBERICHT': escape(_format_datetime(created_at)),
+        'STARTDATUM': escape(_format_date(incident_date_start)),
+        'REGISTRATIEDATUM': escape(_format_date(created_at)),
+        'EINDDATUMGEPLAND': escape(_format_date(incident_date_end)),
         'OPENBARERUIMTENAAM': escape(signal['location']['address']['openbare_ruimte']),
         'HUISNUMMER': escape(signal['location']['address']['huisnummer']),
         'POSTCODE': escape(signal['location']['address']['postcode']),

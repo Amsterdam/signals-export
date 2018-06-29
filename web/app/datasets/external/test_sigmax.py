@@ -8,7 +8,9 @@ import time
 import copy
 import datetime
 from unittest import mock
+
 from lxml import etree
+from dateutil.parser import parse
 
 from django.test import TestCase
 from django.conf import settings
@@ -118,20 +120,38 @@ class TestGenerateStufMessage(TestCase):
                 '{http://www.egem.nl/StUF/sector/bg/0310}postcode',
                 signal['location']['address']['postcode']
             ),
-        ])
+            (
+                '{http://www.egem.nl/StUF/StUF0301}tijdstipBericht',
+                sigmax._format_datetime(parse(signal['created_at']))
+            ),
+            (
+                '{http://www.egem.nl/StUF/sector/zkn/0310}registratiedatum',
+                sigmax._format_date(parse(signal['created_at']))
+            ),
+            (
+                '{http://www.egem.nl/StUF/sector/zkn/0310}startdatum',
+                sigmax._format_date(parse(signal['incident_date_start']))
+            ),
+            (
+                '{http://www.egem.nl/StUF/sector/zkn/0310}einddatumGepland',
+                sigmax._format_date(parse(signal['incident_date_end']))
+            )
+       ])
         # X and Y need to be checked differently
 
         logger.debug(msg)
 
         for element in root.iter():
-            logger.debug('Found: {}'.format(element.tag))
+#            logger.debug('Found: {}'.format(element.tag))
             if element.tag in NEED_TO_FIND:
                 correct = NEED_TO_FIND[element.tag] == element.text
-                logger.debug('Found {} and is correct {}'.format(
-                    element.tag, correct))
-                logger.debug('element.text {}'.format(element.text))
                 if correct:
                     del NEED_TO_FIND[element.tag]
+                else:
+                    logger.debug('Found {} and is correct {}'.format(
+                        element.tag, correct))
+                    logger.debug('element.text {}'.format(element.text))
+
 
         self.assertEquals(len(NEED_TO_FIND), 0)
 
