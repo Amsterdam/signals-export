@@ -25,6 +25,7 @@ from urllib3.util import Retry
 
 import requests
 from requests.adapters import HTTPAdapter
+import jsonschema
 from django.conf import settings
 from django.utils import timezone
 
@@ -61,6 +62,18 @@ def _get_session_with_retries():
     return session
 
 
+def _validate_signal_api_data(data):
+    """
+    Validate that the data received from the signals API matched expectations.
+    """
+    # Note: currently using placeholder schema (until consumed API definition
+    # is settled).
+    jsonschema.validate(data, {
+        '$schema': 'http://json-schema.org/schema#',
+        'type': 'object'
+    })
+
+
 # TODO: move to datasets/internal/signal.py
 def _batch_signals(access_token):
     """
@@ -78,8 +91,11 @@ def _batch_signals(access_token):
             )
             if result.status_code == 403:
                 raise Exception('Wrong or expired access token, cannot access data.')
-            next_page = result.json()['_links']['next']['href']
-            yield result.json()['results']
+
+            api_data = result.json()
+            # _validate_signal_api_data(api_data)
+            next_page = api_data['_links']['next']['href']
+            yield api_data['results']
             if next_page == None:
                 raise StopIteration
 

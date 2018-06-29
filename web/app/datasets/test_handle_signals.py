@@ -1,12 +1,15 @@
+import os
 import json
 import datetime
 import copy
 from unittest import mock
 from unittest.mock import patch
 
+from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 from django.test.utils import override_settings
+from jsonschema.exceptions import ValidationError
 import pytz
 import requests
 
@@ -71,6 +74,32 @@ class TestCallExternalApis(TestCase):
         # Note: this test assumes that the LogOnlyHandler fallback is present.
 
 
+# -- test _validate_signal_api_data --
+
+class TestValidateSignalApi(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        fixture_file = os.path.join(
+            settings.FIXTURES_DIR, 'datasets', 'internal', 'auth_signal.json')
+
+        with open(fixture_file, 'r') as f:
+            test_data = json.load(f)
+        cls._example_signal = test_data['results'][0]
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+    def test_signal(self):
+        signal = copy.deepcopy(self._example_signal)
+        handle_signals._validate_signal_api_data(signal)
+
+    def test_fails_on_bad_data(self):
+        signal = '{ This is not JSON at all!'
+        with self.assertRaises(ValidationError):
+            handle_signals._validate_signal_api_data(signal)
+
+
 # -- test _batch_signals --
 
 _NO_PAGINATION = {
@@ -129,7 +158,7 @@ class TestBatchSignals(TestCase):
             patched_json.json.return_value = _TWO_PAGES[1]  # simulate the second page
 
         self.assertEquals(patched_get.call_count, 2)
-        self.assertEquals(patched_json.json.call_count, 4)
+        self.assertEquals(patched_json.json.call_count, 2)
 
 
 # -- test handle_signals --
