@@ -66,16 +66,3 @@ class GetAccessToken():
         access_token = fragment[0][1]
         os.environ["ACCESS_TOKEN"] = access_token
         return {"Authorization": 'Bearer ' + access_token}
-
-
-if __name__ == "__main__":
-    acceptance = True
-    email = os.getenv('SIGNALS_USER', 'signals.admin@amsterdam.nl')
-    password = os.getenv('SIGNALS_PASSWORD', 'insecure')
-    access_token = GetAccessToken().getAccessToken(email, password, acceptance)
-    print(f'Received new Access Token Header: {access_token}')
-    url = "https://acc.api.data.amsterdam.nl/signals/auth/signal"
-    response = requests.get(url, headers=access_token)
-    jsonresponse = response.json()
-    print(jsonresponse)
-
