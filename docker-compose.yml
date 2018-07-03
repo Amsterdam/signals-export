@@ -36,8 +36,3 @@ services:
       bash -c "/deploy/docker-wait.sh \
               && /deploy/docker-migrate.sh \
               && python manage.py runserver 0.0.0.0:8000"
-
-  swaggerui:
-    image: amsterdam/oauth2swaggerui
-    ports:
-      - 8686:8686
