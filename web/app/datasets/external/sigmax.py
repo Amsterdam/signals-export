@@ -100,9 +100,6 @@ def _generate_stuf_message(signal):
     """
     logger.debug('Openbare ruimte naam in signal: "{}"'.format(
         signal['location']['address']['openbare_ruimte']))
-    # TODO: "huisnummer toevoeging" seems missing - can be a real problem - check this
-    # TODO: check X and Y (are they WGS84, are they lon lat or lat lon?)
-    # TODO: figure out which is which with regards to the dates and times
 
     # convert the ISO8601 datetime strings (from JSON data) to datetime objects
     created_at = parse(signal['created_at'])
