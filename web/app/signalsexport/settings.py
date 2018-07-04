@@ -133,3 +133,14 @@ SWAGGER_SETTINGS = {
 
 TEST_RUNNER = 'signalsexport.runner.PytestTestRunner'
 FIXTURES_DIR = os.path.join(BASE_DIR, 'fixtures')
+
+# The health check will stop the service from starting if credentials/settings are
+# missing from the environment variables. For local development, the health check
+# is not used to stop the service from starting up - so the code will run locally
+# without all credentials to all services. Worst that can happen locally on
+# missing credentials is an exception in the relevant code path. The variable
+# ACTIVE_EXTERNAL_APIS is a string of comma (no whitespace anywhere) separated
+# external service/API names - they are checked by env_vars.py
+ACTIVE_EXTERNAL_APIS = [
+    x.strip() for x in os.getenv('ACTIVE_EXTERNAL_APIS', 'SIGNALS,SIGMAX').split(',')
+]

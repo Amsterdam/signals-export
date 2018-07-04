@@ -4,6 +4,8 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db import connection
 
+from signalsexport.env_vars import required_env_vars_are_present
+
 try:
     # noinspection PyUnresolvedReferences
     from django.apps import apps
@@ -39,6 +41,11 @@ def health(request):
             "Database connectivity failed",
             content_type="text/plain", status=500
         )
+
+    if not required_env_vars_are_present():
+        msg = "Service misconfigured: not all required env variables are set"
+        log.exception(msg)
+        return HttpResponse(msg, content_type="text/plain", status=500)
 
     return HttpResponse(
         "Connectivity OK", content_type="text/plain", status=200)
