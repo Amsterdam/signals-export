@@ -81,8 +81,11 @@ def get_handler(signal):
     # reverse the iteration order over the values because the handler that was
     # added last has precedence of those that were added earlier.
     for handler in reversed(_HANDLERS.values()):
-        if handler.can_handle(signal):
-            return handler
+        try:
+            if handler.can_handle(signal):
+                return handler
+        except NotImplementedError:
+            pass  # handler is not fully implemented
 
 
 # -- Initialize the available API handlers list with a default handler that only logs --

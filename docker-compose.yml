@@ -20,6 +20,10 @@ services:
       DATABASE_USER: signalsexport
       DATABASE_PASSWORD: insecure
 
+      # The following are secrets to Datapunt Amsterdam internal APIs:
+      SIGNALS_USER:
+      SIGNALS_PASSWORD:
+
       # The following are secrets to external APIs:
       SIGMAX_AUTH_TOKEN:
       SIGMAX_SERVER:
@@ -32,8 +36,3 @@ services:
       bash -c "/deploy/docker-wait.sh \
               && /deploy/docker-migrate.sh \
               && python manage.py runserver 0.0.0.0:8000"
-
-  swaggerui:
-    image: amsterdam/oauth2swaggerui
-    ports:
-      - 8686:8686

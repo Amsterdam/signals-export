@@ -29,3 +29,5 @@ drf-yasg[validation]
 swagger-spec-validator
 flex
 lxml
+pytest-django
+python-dateutil

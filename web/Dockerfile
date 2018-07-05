@@ -8,7 +8,7 @@ EXPOSE 8000
 RUN mkdir -p /static \
 	&& chown datapunt /static
 
-COPY requirements.txt /
+COPY requirements-frozen.txt /requirements.txt
 RUN pip install --no-cache-dir -r /requirements.txt
 
 WORKDIR /app

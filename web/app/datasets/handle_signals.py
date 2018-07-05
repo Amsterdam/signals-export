@@ -21,12 +21,16 @@ Possible upgrades:
 import os
 import datetime
 import logging
+from urllib3.util import Retry
 
 import requests
+from requests.adapters import HTTPAdapter
+import jsonschema
 from django.conf import settings
 from django.utils import timezone
 
 from datasets.models import MessageLog
+from datasets.internal.get_auth_token import GetAccessToken
 from datasets.external.base import get_handler
 
 # -- setup logging --
@@ -58,19 +62,42 @@ def _get_session_with_retries():
     return session
 
 
-def _batch_signals(signals):
+def _validate_signal_api_data(data):
+    """
+    Validate that the data received from the signals API matched expectations.
+    """
+    # Note: currently using placeholder schema (until consumed API definition
+    # is settled).
+    jsonschema.validate(data, {
+        '$schema': 'http://json-schema.org/schema#',
+        'type': 'object'
+    })
+
+
+# TODO: move to datasets/internal/signal.py
+def _batch_signals(access_token):
     """
     Access the Signalen in Amsterdam API, retrieve signals.
     """
-    next_page = SIGNALS_API_BASE + '/signal/'
+    next_page = SIGNALS_API_BASE + '/signals/auth/signal/'
 
+    if not access_token:
+        raise Exception('No access token available, cannot access data.')
     with _get_session_with_retries() as session:
-        result = session.get(next_page)
-        yield result.json()['results']
+        while True:
+            result = session.get(
+                next_page,
+                headers=access_token
+            )
+            if result.status_code == 403:
+                raise Exception('Wrong or expired access token, cannot access data.')
 
-        next_page = results.json()['_links']['next']['href']
-        if next_page == None:
-            raise StopIteration
+            api_data = result.json()
+            # _validate_signal_api_data(api_data)
+            next_page = api_data['_links']['next']['href']
+            yield api_data['results']
+            if next_page == None:
+                raise StopIteration
 
 
 def _call_external_apis(signals):
@@ -113,5 +140,12 @@ def handle_signals():
     """
     Entry point (called via manage.py), retrieve and handle signals.
     """
-    for signals in _batch_signals():
+    # FIXME: for now only acceptance is supported (and hardcoded below)
+    acceptance = True
+    email = os.getenv('SIGNALS_USER', 'signals.admin@amsterdam.nl')
+    password = os.getenv('SIGNALS_PASSWORD', 'insecure')
+
+    access_token = GetAccessToken().getAccessToken(email, password, acceptance)
+    for signals in _batch_signals(access_token):
+        logger.debug(signals)
         _call_external_apis(signals)
