@@ -28,7 +28,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write('Send a message to Sigmax.')
         test_signal = _get_test_signal()
-        test_signal.update({'signal_id': 'TEST MESSAGE FROM AMSTERDAM ' + str(uuid.uuid4())})
+        test_signal.update({'signal_id': str(uuid.uuid4())})
 
         msg = _generate_stuf_message(test_signal)
         self.stdout.write('Hier het bericht:')

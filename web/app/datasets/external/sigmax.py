@@ -51,8 +51,8 @@ u"""<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:
                 <ZKN:zaakniveau>1</ZKN:zaakniveau>
                 <ZKN:deelzakenIndicatie>N</ZKN:deelzakenIndicatie>
                 <StUF:extraElementen>
-                   <StUF:extraElement naam="Ycoordinaat">{X}</StUF:extraElement>
-                   <StUF:extraElement naam="Xcoordinaat">{Y}</StUF:extraElement>
+                   <StUF:extraElement naam="Ycoordinaat">{Y}</StUF:extraElement>
+                   <StUF:extraElement naam="Xcoordinaat">{X}</StUF:extraElement>
                 </StUF:extraElementen>
                 <ZKN:isVan StUF:entiteittype="ZAKZKT" StUF:verwerkingssoort="T">
                    <ZKN:gerelateerde StUF:entiteittype="ZKT" StUF:sleutelOntvangend="1" StUF:verwerkingssoort="T">
