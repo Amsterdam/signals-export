@@ -39,8 +39,8 @@ def required_env_vars_are_present():
     * environment variables with an empty string value are considered not set.
     * returns True if all required variables are present, else False
     """
-    error_msg = 'Environment variable {} must be set for service {}'
-    n_errors = 0
+    msg_template = 'Environment variable {} must be set for service {}'
+    error_msgs = []
 
     for api, variables in API_TO_ENV_VAR.items():
         if api not in settings.ACTIVE_EXTERNAL_APIS:
@@ -48,7 +48,10 @@ def required_env_vars_are_present():
 
         for env_var in variables:
             if not os.getenv(env_var, None):
-                logger.error(error_msg.format(env_var, api))
-                n_errors += 1
+                msg = msg_template.format(env_var, api)
 
-    return False if n_errors else True
+                logger.error(msg)
+                error_msgs.append(msg)
+
+    success = False if error_msgs else True
+    return success, '\n'.join(error_msgs)
