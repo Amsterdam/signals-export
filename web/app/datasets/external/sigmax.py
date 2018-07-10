@@ -1,7 +1,20 @@
 """
 Send messages to the external Sigmax API.
 
-Minimal implementation based on work by Maarten Sukel.
+Minimal implementation based on work by Maarten Sukel and Sigmax technical
+documentation. More specifically it implements sections 3.1, 3.1.1, 3.3, 
+3.3.1) from "Technische Documentatie Zaak- en Documentservices koppelvlak
+CityControl t.b.v. Zaakgericht werken" version 1.1.0, 2018-05-02.
+
+SOAP actions:
+
+
+
+This module contains the code to register a "Zaak" with Sigmax / City
+Control and follow it up by sending a PDF with extra information from the
+SIA system.
+
+
 """
 import os
 import logging
