@@ -1,7 +1,9 @@
 """
-Send messages to the external Sigmax API.
+Test script for the Sigmax API connection (SIA as sending side).
 
-Minimal implementation based on work by Maarten Sukel.
+Note:
+* this script is based on example messages given to use by Sigmax
+* full integration will be based on what we learn here
 """
 import os
 import logging
@@ -124,31 +126,7 @@ EXAMPLE_MESSAGE_2 = """<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soa
          </ZKN:object>
       </ZKN:edcLk01>
    </soap:Body>
-</soap:Envelope>
-"""
-
-EXAMPLE_MESSAGE_3 = """<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<soap:Body>
-		<ZDS:genereerDocumentIdentificatie_Di02 xmlns:StUF="http://www.egem.nl/StUF/StUF0301" xmlns:ZDS="http://www.stufstandaarden.nl/koppelvlak/zds0120" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-			<ZDS:stuurgegevens>
-				<StUF:berichtcode>Di02</StUF:berichtcode>
-				<StUF:zender>
-					<StUF:organisatie>AMS</StUF:organisatie>
-					<StUF:applicatie>VER</StUF:applicatie>
-				</StUF:zender>
-				<StUF:ontvanger>
-					<StUF:organisatie>SMX</StUF:organisatie>
-					<StUF:applicatie>CTC</StUF:applicatie>
-				</StUF:ontvanger>
-				<StUF:referentienummer>1234567890</StUF:referentienummer>
-				<StUF:tijdstipBericht>20180517132910</StUF:tijdstipBericht>
-				<StUF:functie>genereerDocumentidentificatie</StUF:functie>
-			</ZDS:stuurgegevens>
-		</ZDS:genereerDocumentIdentificatie_Di02>
-	</soap:Body>
 </soap:Envelope>"""
-EXAMPLE_MESSAGE_4 = """
-"""
 
 
 # -- functions that generate or send messages --
@@ -189,13 +167,11 @@ def send_example(**options):
     msg = {
         '1': EXAMPLE_MESSAGE_1,
         '2': EXAMPLE_MESSAGE_2,  # does not seem to work as yet
-        # '3': EXAMPLE_MESSAGE_3,  # this is an incoming message
     }[example]
 
     action = {
         '1': 'http://www.egem.nl/StUF/sector/zkn/0310/CreeerZaak_Lk01',
-        '2': 'http://www.egem.nl/StUF/sector/zkn/0310/voegZaakdocumentToe_Lk01',
-        # '3': 'http://www.egem.nl/StUF/sector/zkn/0310/genereerDocumentIdentificatie_Di02',  # this is incoming message
+        '2': 'http://www.egem.nl/StUF/sector/zkn/0310/VoegZaakdocumentToe_Lk01',
     }[example]
 
     logger.info("Using zaak identifier (between quotes): '{}'".format(zkn_uuid))
@@ -208,6 +184,11 @@ def send_example(**options):
     logger.debug('-- Send the following --')
     logger.debug(encoded)
     logger.debug('--')
+
+## -- uncomment this to get the message dumped to a file in the local directory --
+##     fn = 'attempt-{}.xml'.format(uuid.uuid4())
+##     with open(os.path.join(os.path.split(__file__)[0], fn), 'wb') as f:
+##         f.write(encoded)
 
     headers = {
         'SOAPAction': action,
@@ -227,4 +208,3 @@ def send_example(**options):
     # We return the response object so that we can check the response from
     # the external API handler.
     return response
-
