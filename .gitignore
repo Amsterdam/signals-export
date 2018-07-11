@@ -104,3 +104,4 @@ venv.bak/
 .mypy_cache/
 
 explore/*
+setup_env_acctest.sh
