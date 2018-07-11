@@ -6,7 +6,8 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 from datasets.external.sigmax import _generate_creeer_zaak_lk01_message
-form datasets.external.sigmax import _send_stuf_message
+from datasets.external.sigmax import _send_stuf_message
+from datasets.external.sigmax import SigmaxHandler
 
 
 def _get_test_signal():
@@ -31,13 +32,16 @@ class Command(BaseCommand):
         test_signal = _get_test_signal()
         test_signal.update({'signal_id': str(uuid.uuid4())})
 
-        msg = _generate_creeer_zaak_lk01_message(test_signal)
-        self.stdout.write('Hier het bericht:')
-        self.stdout.write(msg)
-        self.stdout.write('Einde bericht')
-
-        self.stdout.write('Sending a message to Sigmax.')
-        r = _send_stuf_message(msg)
-        self.stdout.write('response status code: {}'.format(r.status_code))
-        self.stdout.write('Logging response.text :')
-        self.stdout.write(r.text)
+        sh = SigmaxHandler()
+        sh.handle(test_signal)
+##
+##        msg = _generate_creeer_zaak_lk01_message(test_signal)
+##        self.stdout.write('Hier het bericht:')
+##        self.stdout.write(msg)
+##        self.stdout.write('Einde bericht')
+##
+##        self.stdout.write('Sending a message to Sigmax.')
+##        r = _send_stuf_message(msg)
+##        self.stdout.write('response status code: {}'.format(r.status_code))
+##        self.stdout.write('Logging response.text :')
+##        self.stdout.write(r.text)

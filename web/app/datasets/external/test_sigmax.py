@@ -197,7 +197,8 @@ class TestSendStufMessage(TestCase):
 
         with mock.patch.dict('os.environ', env_override):
             with self.assertRaises(sigmax.ServiceNotConfigured):
-                sigmax._send_stuf_message('TEST BERICHT')
+                action = 'http://www.egem.nl/StUF/sector/zkn/0310/CreeerZaak_Lk01'
+                sigmax._send_stuf_message('TEST BERICHT', action)
 
 
     @mock.patch('requests.post', side_effect=show_args_kwargs)
@@ -210,7 +211,8 @@ class TestSendStufMessage(TestCase):
         }
 
         with mock.patch.dict('os.environ', env_override):
-            args, kwargs = sigmax._send_stuf_message(message)
+            action = 'http://www.egem.nl/StUF/sector/zkn/0310/CreeerZaak_Lk01'
+            args, kwargs = sigmax._send_stuf_message(message, action)
 
             self.assertEquals(request_post_mock.called, 1)
             self.assertEquals(kwargs['url'], 'TESTSERVER')

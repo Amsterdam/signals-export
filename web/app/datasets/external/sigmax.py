@@ -88,7 +88,7 @@ def _generate_voeg_zaak_document_toe_lk01(signal, pdf_buffer=None):
     })
 
 
-def _send_stuf_message(stuf_msg):
+def _send_stuf_message(stuf_msg, soap_action):
     """
     Send a STUF message to the server that is configured.
     """
@@ -106,7 +106,7 @@ def _send_stuf_message(stuf_msg):
     # Prepare our request to Sigmax
     encoded = stuf_msg.encode('utf-8')
     headers = {
-        'SOAPAction': 'http://www.egem.nl/StUF/sector/zkn/0310/CreeerZaak_Lk01',
+        'SOAPAction': soap_action,
         'Content-Type': 'text/xml; charset=UTF-8',
         'Authorization': 'Basic ' + SIGMAX_AUTH_TOKEN,
         'Content-Length': bytes(len(encoded))
@@ -132,5 +132,14 @@ def _send_stuf_message(stuf_msg):
 
 class SigmaxHandler(BaseAPIHandler):
     def handle(self, signal):
+        soap_action = 'http://www.egem.nl/StUF/sector/zkn/0310/CreeerZaak_Lk01'
         msg = _generate_creeer_zaak_lk01_message(signal)
-        _send_stuf_message(msg)
+        response = _send_stuf_message(msg, soap_action)
+        logger.info('Sent {}'.format(soap_action))
+        logger.info('Received:\n{}'.format(response.text))
+
+        soap_action = 'http://www.egem.nl/StUF/sector/zkn/0310/VoegZaakdocumentToe_Lk01'
+        msg = _generate_voeg_zaak_document_toe_lk01(signal)
+        response = _send_stuf_message(msg, soap_action)
+        logger.info('Sent {}'.format(soap_action))
+        logger.info('Received:\n{}'.format(response.text))
