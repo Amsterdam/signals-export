@@ -7,8 +7,8 @@ documentation. More specifically it implements sections 3.1, 3.1.1, 3.3,
 CityControl t.b.v. Zaakgericht werken" version 1.1.0, 2018-05-02.
 
 SOAP actions:
-
-
+- http://www.egem.nl/StUF/sector/zkn/0310/CreeerZaak_Lk01
+- http://www.egem.nl/StUF/sector/zkn/0310/VoegZaakdocumentToe_Lk01
 
 This module contains the code to register a "Zaak" with Sigmax / City
 Control and follow it up by sending a PDF with extra information from the
@@ -19,11 +19,15 @@ SIA system.
 import os
 import logging
 import datetime
+import uuid
 import requests
 from dateutil.parser import parse
 from xml.sax.saxutils import escape
 
 from datasets.external.base import BaseAPIHandler
+from datasets.external.sigmax_pdf import _generate_pdf
+from datasets.external.sigmax_xml_templates import CREER_ZAAK
+from datasets.external.sigmax_xml_templates import VOEG_ZAAK_DOCUMENT_TOE
 
 LOG_FORMAT = '%(asctime)-15s - %(name)s - %(message)s'
 logging.basicConfig(format=LOG_FORMAT, level=logging.DEBUG)
@@ -32,63 +36,6 @@ logger = logging.getLogger(__name__)
 # -- format string for message generation --
 
 PLACEHOLDER_STRING = ''
-TEMPLATE =\
-u"""<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-       <soap:Body>
-          <ZKN:zakLk01 xmlns:ZKN="http://www.egem.nl/StUF/sector/zkn/0310" xmlns:BG="http://www.egem.nl/StUF/sector/bg/0310" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:gml="http://www.opengis.net/gml" xmlns:bag="http://www.vrom.nl/bag/0120" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:StUF="http://www.egem.nl/StUF/StUF0301" xmlns:tns="http://www.circlesoftware.nl/verseon/mng/webservice/2012" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xlink="http://www.w3.org/1999/xlink">
-             <ZKN:stuurgegevens>
-                <StUF:berichtcode>Lk01</StUF:berichtcode>
-                <StUF:zender>
-                   <StUF:organisatie>AMS</StUF:organisatie>
-                   <StUF:applicatie>VER</StUF:applicatie>
-                </StUF:zender>
-                <StUF:ontvanger>
-                   <StUF:organisatie>SMX</StUF:organisatie>
-                   <StUF:applicatie>CTC</StUF:applicatie>
-                </StUF:ontvanger>
-                <StUF:referentienummer>{PRIMARY_KEY}</StUF:referentienummer>
-                <StUF:tijdstipBericht>{TIJDSTIPBERICHT}</StUF:tijdstipBericht>
-                <StUF:entiteittype>ZAK</StUF:entiteittype>
-             </ZKN:stuurgegevens>
-             <ZKN:parameters>
-                <StUF:mutatiesoort>T</StUF:mutatiesoort>
-                <StUF:indicatorOvername>V</StUF:indicatorOvername>
-             </ZKN:parameters>
-             <ZKN:object StUF:entiteittype="ZAK" StUF:sleutelGegevensbeheer="" StUF:verwerkingssoort="T">
-                <ZKN:identificatie>{PRIMARY_KEY}</ZKN:identificatie>
-                <ZKN:omschrijving>{OMSCHRIJVING}</ZKN:omschrijving>
-                <ZKN:startdatum>{STARTDATUM}</ZKN:startdatum>
-                <ZKN:registratiedatum>{REGISTRATIEDATUM}</ZKN:registratiedatum>
-                <ZKN:einddatumGepland>{EINDDATUMGEPLAND}</ZKN:einddatumGepland>
-                <ZKN:archiefnominatie>N</ZKN:archiefnominatie>
-                <ZKN:zaakniveau>1</ZKN:zaakniveau>
-                <ZKN:deelzakenIndicatie>N</ZKN:deelzakenIndicatie>
-                <StUF:extraElementen>
-                   <StUF:extraElement naam="Ycoordinaat">{Y}</StUF:extraElement>
-                   <StUF:extraElement naam="Xcoordinaat">{X}</StUF:extraElement>
-                </StUF:extraElementen>
-                <ZKN:isVan StUF:entiteittype="ZAKZKT" StUF:verwerkingssoort="T">
-                   <ZKN:gerelateerde StUF:entiteittype="ZKT" StUF:sleutelOntvangend="1" StUF:verwerkingssoort="T">
-                      <ZKN:omschrijving>Uitvoeren controle</ZKN:omschrijving>
-                      <ZKN:code>2</ZKN:code>
-                   </ZKN:gerelateerde>
-                </ZKN:isVan>
-                <ZKN:heeftBetrekkingOp StUF:entiteittype="ZAKOBJ" StUF:verwerkingssoort="T">
-                   <ZKN:gerelateerde>
-                      <ZKN:adres StUF:entiteittype="AOA" StUF:verwerkingssoort="T">
-                         <BG:wpl.woonplaatsNaam>Amsterdam</BG:wpl.woonplaatsNaam>
-                         <BG:gor.openbareRuimteNaam>{OPENBARERUIMTENAAM}</BG:gor.openbareRuimteNaam>
-                         <BG:huisnummer>{HUISNUMMER}</BG:huisnummer>
-                         <BG:huisletter StUF:noValue="geenWaarde" xsi:nil="true"/>
-                         <BG:postcode>{POSTCODE}</BG:postcode>
-                      </ZKN:adres>
-                   </ZKN:gerelateerde>
-                </ZKN:heeftBetrekkingOp>
-             </ZKN:object>
-          </ZKN:zakLk01>
-       </soap:Body>
-    </soap:Envelope>"""
-
 
 # -- helper functions --
 def _format_datetime(dt):
@@ -107,19 +54,16 @@ class ServiceNotConfigured(Exception):
 
 # -- functions that generate or send messages --
 
-def _generate_stuf_message(signal):
+def _generate_creeer_zaak_lk01_message(signal):
     """
-    Generate the XML needed for Sigmax.
+    Generate XML for Sigmax CreeerZaak_Lk01
     """
-    logger.debug('Openbare ruimte naam in signal: "{}"'.format(
-        signal['location']['address']['openbare_ruimte']))
-
     # convert the ISO8601 datetime strings (from JSON data) to datetime objects
     created_at = parse(signal['created_at'])
     incident_date_start = parse(signal['incident_date_start'])
     incident_date_end = parse(signal['incident_date_end'])
 
-    return TEMPLATE.format(**{
+    return CREER_ZAAK.format(**{
         'PRIMARY_KEY': escape(signal['signal_id']),
         'OMSCHRIJVING': escape('Dit is een test bericht'),
         'TIJDSTIPBERICHT': escape(_format_datetime(created_at)),
@@ -131,6 +75,16 @@ def _generate_stuf_message(signal):
         'POSTCODE': escape(signal['location']['address']['postcode']),
         'X': escape(str(signal['location']['geometrie']['coordinates'][0])),
         'Y': escape(str(signal['location']['geometrie']['coordinates'][1])),
+    })
+
+
+def _generate_voeg_zaak_document_toe_lk01(signal, pdf_buffer=None):
+    """
+    Generate XML for Sigmax VoegZaakdocumentToe_Lk01
+    """
+    return VOEG_ZAAK_DOCUMENT_TOE.format(**{
+        'ZKN_UUID': escape(signal['signal_id']),
+        'DOC_UUID': escape(str(uuid.uuid4()))
     })
 
 
@@ -178,5 +132,5 @@ def _send_stuf_message(stuf_msg):
 
 class SigmaxHandler(BaseAPIHandler):
     def handle(self, signal):
-        msg = _generate_stuf_message(signal)
+        msg = _generate_creeer_zaak_lk01_message(signal)
         _send_stuf_message(msg)

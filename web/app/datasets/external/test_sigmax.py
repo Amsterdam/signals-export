@@ -58,7 +58,7 @@ class TestSigmaxHelpers(TestCase):
             sigmax._format_date(t)
 
 
-class TestGenerateStufMessage(TestCase):
+class TestGenerateCreeerZaakLk01Message(TestCase):
     @classmethod
     def setUpClass(cls):
         fixture_file = os.path.join(
@@ -74,7 +74,7 @@ class TestGenerateStufMessage(TestCase):
 
     def test_is_xml(self):
         signal = copy.deepcopy(self._example_signal)
-        xml = sigmax._generate_stuf_message(signal)
+        xml = sigmax._generate_creeer_zaak_lk01_message(signal)
 
         try:
             root = etree.fromstring(xml)
@@ -84,13 +84,13 @@ class TestGenerateStufMessage(TestCase):
     def test_escaping(self):
         poison = copy.deepcopy(self._example_signal)
         poison.update({'signal_id': '<poison>tastes nice</poison>'})
-        msg = sigmax._generate_stuf_message(poison)
+        msg = sigmax._generate_creeer_zaak_lk01_message(poison)
         self.assertTrue('<poison>' not in msg)
 
     def test_propagate_signal_properties_to_message(self):
         signal = copy.deepcopy(self._example_signal)
 
-        msg = sigmax._generate_stuf_message(signal)
+        msg = sigmax._generate_creeer_zaak_lk01_message(signal)
 
         # first test that we have obtained valid XML
         try:
@@ -154,6 +154,35 @@ class TestGenerateStufMessage(TestCase):
 
 
         self.assertEquals(len(NEED_TO_FIND), 0)
+
+
+class TestVoegZaakDocumentToeLk01Message(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        fixture_file = os.path.join(
+            settings.FIXTURES_DIR, 'datasets', 'internal', 'auth_signal.json')
+
+        with open(fixture_file, 'r') as f:
+            test_data = json.load(f)
+        cls._example_signal = test_data['results'][0]
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+    def test_is_xml(self):
+        signal = copy.deepcopy(self._example_signal)
+        xml = sigmax._generate_voeg_zaak_document_toe_lk01(signal)
+        try:
+            root = etree.fromstring(xml)
+        except:
+            self.fail('Cannot parse STUF message as XML')
+
+    def test_escaping(self):
+        poison = copy.deepcopy(self._example_signal)
+        poison.update({'signal_id': '<poison>tastes nice</poison>'})
+        msg = sigmax._generate_voeg_zaak_document_toe_lk01(poison)
+        self.assertTrue('<poison>' not in msg)
 
 
 def show_args_kwargs(*args, **kwargs):
