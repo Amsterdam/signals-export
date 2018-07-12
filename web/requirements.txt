@@ -33,3 +33,6 @@ flex
 lxml
 pytest-django
 python-dateutil
+
+# PDF generation related
+WeasyPrint

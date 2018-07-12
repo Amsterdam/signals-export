@@ -82,10 +82,17 @@ def _generate_voeg_zaak_document_toe_lk01(signal, pdf_buffer=None):
     """
     Generate XML for Sigmax VoegZaakdocumentToe_Lk01
     """
-    return VOEG_ZAAK_DOCUMENT_TOE.format(**{
+    encoded_pdf = _generate_pdf(signal)
+    msg = VOEG_ZAAK_DOCUMENT_TOE.format(**{
         'ZKN_UUID': escape(signal['signal_id']),
-        'DOC_UUID': escape(str(uuid.uuid4()))
+        'DOC_UUID': escape(str(uuid.uuid4())),
+        'PDF_DATA': encoded_pdf.decode('utf-8'),
+        'DOC_TYPE': 'PDF',
+        'DOC_TYPE_LOWER': 'pdf',
+        'FILE_NAME': 'info-' + signal['signal_id'] + '.pdf'
     })
+
+    return msg
 
 
 def _send_stuf_message(stuf_msg, soap_action):
@@ -96,8 +103,6 @@ def _send_stuf_message(stuf_msg, soap_action):
     # either testing or production --- not configurable at run time).
     SIGMAX_AUTH_TOKEN = os.getenv('SIGMAX_AUTH_TOKEN', None)
     SIGMAX_SERVER = os.getenv('SIGMAX_SERVER', None)
-    logger.debug('SIGMAX_SERVER: {}'.format(SIGMAX_SERVER))
-    logger.debug('SIGMAX_AUTH_TOKEN: {}'.format(SIGMAX_AUTH_TOKEN))
 
     if not SIGMAX_AUTH_TOKEN or not SIGMAX_SERVER:
         msg = 'SIGMAX_AUTH_TOKEN or SIGMAX_SERVER not configured.'
@@ -140,6 +145,12 @@ class SigmaxHandler(BaseAPIHandler):
 
         soap_action = 'http://www.egem.nl/StUF/sector/zkn/0310/VoegZaakdocumentToe_Lk01'
         msg = _generate_voeg_zaak_document_toe_lk01(signal)
+
+## -- uncomment this to get the message dumped to a file in the local directory --
+##        DIR = os.path.split(__file__)[0]
+##        with open(os.path.join(DIR, 'dumped-' + str(uuid.uuid4()) + '.xml'), 'wb') as f:
+##            f.write(msg.encode('utf-8'))
+
         response = _send_stuf_message(msg, soap_action)
         logger.info('Sent {}'.format(soap_action))
         logger.info('Received:\n{}'.format(response.text))
