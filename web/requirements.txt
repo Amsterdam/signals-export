@@ -7,6 +7,8 @@ markdown
 django-filter
 django_extensions
 
+djangorestframework-csv
+
 django-cors-headers
 datapunt-authorization-django
 datapunt-authorization-levels
