@@ -17,11 +17,11 @@ from django.conf import settings
 
 from datasets.external import sigmax
 
-
 LOG_FORMAT = '%(asctime)-15s - %(name)s - %(message)s'
 logging.basicConfig(format=LOG_FORMAT, level=logging.DEBUG)
 logging.disable(logging.NOTSET)
 logger = logging.getLogger(__name__)
+
 
 class TestSigmaxHelpers(TestCase):
     def test_format_datetime(self):

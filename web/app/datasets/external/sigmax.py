@@ -14,15 +14,19 @@ This module contains the code to register a "Zaak" with Sigmax / City
 Control and follow it up by sending a PDF with extra information from the
 SIA system.
 
-
+For the initial release the PDF docuement, image and map will be sent as
+separate files (Sigmax employee handsets allow these to be accessed 
+individually).
 """
 import os
 import logging
 import datetime
 import uuid
+import base64
+from xml.sax.saxutils import escape
+
 import requests
 from dateutil.parser import parse
-from xml.sax.saxutils import escape
 
 from datasets.external.base import BaseAPIHandler
 from datasets.external.sigmax_pdf import _generate_pdf
@@ -78,21 +82,54 @@ def _generate_creeer_zaak_lk01_message(signal):
     })
 
 
-def _generate_voeg_zaak_document_toe_lk01(signal, pdf_buffer=None):
+def _generate_voeg_zaak_document_toe_lk01(signal):
     """
-    Generate XML for Sigmax VoegZaakdocumentToe_Lk01
+    Generate XML for Sigmax VoegZaakdocumentToe_Lk01 (for the PDF case)
     """
     encoded_pdf = _generate_pdf(signal)
     msg = VOEG_ZAAK_DOCUMENT_TOE.format(**{
         'ZKN_UUID': escape(signal['signal_id']),
         'DOC_UUID': escape(str(uuid.uuid4())),
-        'PDF_DATA': encoded_pdf.decode('utf-8'),
+        'DATA': encoded_pdf.decode('utf-8'),
         'DOC_TYPE': 'PDF',
         'DOC_TYPE_LOWER': 'pdf',
-        'FILE_NAME': 'info-' + escape(signal['signal_id']) + '.pdf'
+        'FILE_NAME': 'MORA-' + escape(str(signal['id'])) + '.pdf'
     })
 
     return msg
+
+
+def _generate_voeg_zaak_document_toe_lk01_jpg(signal):
+    """
+    Generate XML for Sigmax VoegZaakdocumentToe_Lk01 (for the JPG case)
+    """
+    encoded_jpg = b''
+    if signal['image'] and signal['image'].startswith('http'):
+        # TODO: add check that we have a JPG and not anything else!
+        try:
+            result = requests.get(signal['image'])
+        except:
+            pass  # for now swallow 404, 401 etc
+        else:
+            encoded_jpg = result.content
+    else:
+        # TODO: CODE PATH FOR TESTING, REMOVE THE WHOLE ELSE CLAUSE
+        with open(os.path.join(os.path.split(__file__)[0], 'raket.jpg'), 'rb') as f:
+            encoded_jpg = base64.b64encode(f.read())
+            print(encoded_jpg)
+
+    if encoded_jpg:
+        msg = VOEG_ZAAK_DOCUMENT_TOE.format(**{
+            'ZKN_UUID': escape(signal['signal_id']),
+            'DOC_UUID': escape(str(uuid.uuid4())),
+            'DATA': encoded_jpg.decode('utf-8'),
+            'DOC_TYPE': 'JPG',
+            'DOC_TYPE_LOWER': 'jpg',
+            'FILE_NAME': 'MORA-' + escape(str(signal['id'])) + '.jpg'
+        })
+        return msg
+    else:
+        return ''
 
 
 def _send_stuf_message(stuf_msg, soap_action):
@@ -145,12 +182,20 @@ class SigmaxHandler(BaseAPIHandler):
 
         soap_action = 'http://www.egem.nl/StUF/sector/zkn/0310/VoegZaakdocumentToe_Lk01'
         msg = _generate_voeg_zaak_document_toe_lk01(signal)
-
-## -- uncomment this to get the message dumped to a file in the local directory --
-##        DIR = os.path.split(__file__)[0]
-##        with open(os.path.join(DIR, 'dumped-' + str(uuid.uuid4()) + '.xml'), 'wb') as f:
-##            f.write(msg.encode('utf-8'))
-
         response = _send_stuf_message(msg, soap_action)
         logger.info('Sent {}'.format(soap_action))
         logger.info('Received:\n{}'.format(response.text))
+
+        # Try to also send the image for this zaak
+        soap_action = 'http://www.egem.nl/StUF/sector/zkn/0310/VoegZaakdocumentToe_Lk01'
+        msg = _generate_voeg_zaak_document_toe_lk01_jpg(signal)
+        if msg:
+            response = _send_stuf_message(msg, soap_action)
+            logger.info('Sent {}'.format(soap_action))
+            logger.info('Received:\n{}'.format(response.text))
+        else:
+            logger.info('No image, or URL expired for signal {}'.format(
+                signal['signal_id']
+            ))
+
+

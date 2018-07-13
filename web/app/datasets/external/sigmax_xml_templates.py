@@ -93,7 +93,7 @@ VOEG_ZAAK_DOCUMENT_TOE = """<soap:Envelope xmlns:soap="http://schemas.xmlsoap.or
             <ZKN:verzenddatum StUF:noValue="geenWaarde" xsi:nil="true"/>
             <ZKN:vertrouwelijkAanduiding>VERTROUWELIJK</ZKN:vertrouwelijkAanduiding>
             <ZKN:auteur>Tester</ZKN:auteur>
-            <ZKN:inhoud mime:contentType="{DOC_TYPE_LOWER}" StUF:bestandsnaam="{FILE_NAME}">{PDF_DATA}</ZKN:inhoud>
+            <ZKN:inhoud mime:contentType="{DOC_TYPE_LOWER}" StUF:bestandsnaam="{FILE_NAME}">{DATA}</ZKN:inhoud>
             <ZKN:isRelevantVoor StUF:entiteittype="EDCZAK" StUF:verwerkingssoort="T">
                <ZKN:gerelateerde StUF:entiteittype="ZAK" StUF:sleutelVerzendend="2356401" StUF:sleutelOntvangend="" StUF:sleutelGegevensbeheer="2356401" StUF:verwerkingssoort="T">
                   <ZKN:identificatie>{ZKN_UUID}</ZKN:identificatie>
