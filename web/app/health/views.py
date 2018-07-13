@@ -42,10 +42,9 @@ def health(request):
             content_type="text/plain", status=500
         )
 
-    healthy, error_msg = required_env_vars_are_present()
-    if healthy:
+    healthy, error_msgs = required_env_vars_are_present()
+    if not healthy:
         msg = "Service misconfigured: not all required env variables are set"
-        log.exception('{}\n{}'.format(msg, error_msg))
         return HttpResponse(msg, content_type="text/plain", status=500)
 
     return HttpResponse(

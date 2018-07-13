@@ -54,4 +54,4 @@ def required_env_vars_are_present():
                 error_msgs.append(msg)
 
     success = False if error_msgs else True
-    return success, '\n'.join(error_msgs)
+    return success, error_msgs
