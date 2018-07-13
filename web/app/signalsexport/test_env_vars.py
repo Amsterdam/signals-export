@@ -5,7 +5,7 @@ from signalsexport import env_vars
 
 class CheckReqEnvVars(TestCase):
     # (not fully paramtrized, assumes SIGNALS,SIGMAX APIs for now)
-    def should_fail(self):
+    def test_should_fail(self):
         # missing credentials
         env_override = {
             'SIGNALS_USER': '',
@@ -15,7 +15,7 @@ class CheckReqEnvVars(TestCase):
             success, mssg = env_vars.required_env_vars_are_present()
             self.assertEquals(success, False)
 
-    def should_succeed(self):
+    def test_should_succeed(self):
         # all credentials present
         env_override = {
             'SIGNALS_USER': 'NOT EMPTY',

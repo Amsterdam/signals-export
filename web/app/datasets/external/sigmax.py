@@ -89,7 +89,7 @@ def _generate_voeg_zaak_document_toe_lk01(signal, pdf_buffer=None):
         'PDF_DATA': encoded_pdf.decode('utf-8'),
         'DOC_TYPE': 'PDF',
         'DOC_TYPE_LOWER': 'pdf',
-        'FILE_NAME': 'info-' + signal['signal_id'] + '.pdf'
+        'FILE_NAME': 'info-' + escape(signal['signal_id']) + '.pdf'
     })
 
     return msg
